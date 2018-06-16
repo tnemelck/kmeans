@@ -18,6 +18,7 @@ def main():
     
     df = bdd.concat_dir(path)
     df = bdd.drop_profile(df, drop_var)
+    df = bdd.bdd2bow(bdd)
     idx, mtx = bdd.df2np(df)
     del df
     

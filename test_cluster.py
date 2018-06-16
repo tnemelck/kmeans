@@ -14,7 +14,7 @@ def init_board(N, mini = -1, maxi = 1):
     X = npr.uniform(mini, maxi (N, 2))
     return X
 
-def init_board_gauss(N, k, mini = -1, maxi = -1, ecart_min = 0.05, ecart_max = 0.10):
+def init_board_gauss(N, k, mini = -1, maxi = 1, ecart_min = 0.05, ecart_max = 0.10):
     n = N//k
     X = []
     for i in range(k):
