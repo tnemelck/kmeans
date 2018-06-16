@@ -51,6 +51,7 @@ class Kmeans():
             erase_dir : boolean indiquant si le répertoire de stockage doit être vidé, défaut, défaut True
             cpu : nombre de coeur à utiliser dans la parralélisation des différentes fonctions, défaut 1
             verbose : indique si les normalisations doivent être indiqués
+            index  : vecteur numpy des index de la matrice data
             
         Attributs de classes :
             data : instance de la classe Data contenant les données

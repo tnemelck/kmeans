@@ -12,6 +12,12 @@ Created on Wed May  9 02:35:02 2018
 import pandas as pd
 import txt_analysis as TA
 from math import log10
+from glob import glob
+from os.path import abspath
+from re import split
+from math import pi
+from numpy import cos, sin
+import datetime
 
 
 def json2pd(adr):
@@ -23,7 +29,58 @@ def json2pd(adr):
     with open(adr, 'r') as f:
         r = f.read()
         bdd = pd.read_json(r, orient = 'records', lines = True)
+    bdd = bdd['user'].apply(pd.Series).join(bdd.drop('user', 1),
+             how = "left", lsuffix="_profile", rsuffix="_tweet")
     return bdd
+
+
+def filterBYlanguage(bdd, lan = 'fr'):
+    bdd = bdd[(bdd.lang_tweet == lan)]
+    return bdd
+
+
+def keepNdropPD_txt(bdd):
+    bdd = bdd.loc[:, ["id_profile", "text"]]
+    return bdd
+
+
+def aggregate_bddFiltered(bdd):
+    grp = bdd.groupby("id_profile")
+    bdd = grp.agg(["count", lambda x: "\n".join(x)])
+    bdd.columns = bdd.columns.droplevel(0)
+    bdd = bdd.rename(columns={ bdd.columns[0]: "counting",  bdd.columns[1]: "text"})
+    return bdd
+
+def json2bdd_agreg(json):
+    return aggregate_bddFiltered(keepNdropPD_txt(filterBYlanguage(json2pd(json))))
+
+
+#bdd = aggregate_bddFiltered(keepNdropPD_txt(filterBYlanguage(json2pd(file))))
+    
+
+def concat_bdd_aggreg(bdd1, bdd2):
+    bdd21 = bdd1.counting.add(bdd2.counting, fill_value=0)
+    bdd22 =  bdd1.text.add(bdd2.text, fill_value="")
+    bdd2 = pd.concat([bdd21, bdd22], axis=1)
+    return bdd2
+
+
+def concat_dir(dirname):
+    path = abspath(dirname)
+    lst = glob(path+"/*.json")
+    bdd = json2bdd_agreg(lst[0])
+    for i in range(1, len(lst)):
+        try:
+            bdd2 = json2bdd_agreg(lst[i])
+            bdd = concat_bdd_aggreg(bdd, bdd2)
+        except ValueError as e:
+            print("Erreur '{}' sur l'étape {}".format(e, i))
+            continue
+    return bdd
+
+
+def drop_profile(bdd, n = 2):
+    return bdd.loc[bdd["counting"] >= n, "text"]
 
 
 def bdd2bow(bdd):
@@ -35,7 +92,7 @@ def bdd2bow(bdd):
     Entrée : le dataframe panda
     Sortie : le dataframe bag of word
     """
-    T = bdd["text"]
+    T = bdd["text"] if isinstance(bdd, pd.core.frame.DataFrame) else bdd
     T = T.map(TA.formate_txt)
     T = T.map(TA.bow)
     bow = pd.DataFrame.from_dict(T.tolist())
@@ -134,6 +191,46 @@ def df2np(df):
     mtx = df.as_matrix()
     idx = df.index.values
     return (idx, mtx)
+
+
+def dateBDD(bdd):
+    dico_month = {1 : 31, 2 : 28, 3 : 31, 4 : 30, 5 : 31, 6 : 30, 7 : 31,
+                  8 : 31, 9 : 30, 10 : 31, 11 : 30, 12 : 30}
+    bdd = bdd.loc[:, ['id_tweet', 'created_at_tweet']].set_index('id_tweet')
+    bdd.created_at_tweet = bdd.created_at_tweet.apply(lambda x: list(map(int, split('[: -]', str(x)))))
+    bdd["hour"] = bdd.created_at_tweet.apply(lambda lst: (lst[-3] + lst[-2] / 60 + lst[-1] / (60**2)) * (pi/12))
+    bdd["hour_X"] = bdd.hour.apply(cos)
+    bdd["hour_Y"] = bdd.hour.apply(sin)
+    bdd["day_X"] = bdd.created_at_tweet.apply(lambda x: cos(x[2] * pi / 6))
+    bdd["day_Y"] = bdd.created_at_tweet.apply(lambda x: sin(x[2] * pi / 6))
+    bdd["dayweek"] = bdd.created_at_tweet.apply(lambda x: datetime.date(x[0], x[1], x[2]).weekday())
+    bdd["dayweek_X"] = bdd.dayweek.apply(lambda x: cos(x * 2 * pi / 7))
+    bdd["dayweek_Y"] = bdd.dayweek.apply(lambda x: sin(x * 2 * pi / 7))
+    bdd["month_X"] = bdd.created_at_tweet.apply(lambda x: cos(x[1] * pi / dico_month[x[2]]))
+    bdd["month_Y"] = bdd.created_at_tweet.apply(lambda x: sin(x[1] * pi / dico_month[x[2]]))
+    bdd["year"] = bdd.created_at_tweet.apply(lambda x: x[0])
+    bdd.drop(labels = ["created_at_tweet", "hour", "dayweek"], axis = 1, inplace = True)
+    return bdd
+
+
+def json2dateBDD(json):
+    return dateBDD(filterBYlanguage(json2pd(json)))
+
+
+
+def date_dir(dirname):
+    path = abspath(dirname)
+    lst = glob(path+"/*.json")
+    bdd = json2dateBDD(lst[0])
+    for i in range(1, len(lst)):
+        try:
+            bdd2 = json2dateBDD(lst[i])
+            bdd = pd.concat([bdd, bdd2], axis=0)
+        except ValueError as e:
+            print("Erreur '{}' sur l'étape {}".format(e, i))
+            continue
+    return bdd
+    
 
 
 
