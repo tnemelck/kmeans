@@ -1,0 +1,6 @@
+numpy
+scipy
+pathos
+pandas
+datetime
+matplotlib
