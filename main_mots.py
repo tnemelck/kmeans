@@ -18,11 +18,11 @@ def main():
     
     df = bdd.concat_dir(path)
     df = bdd.drop_profile(df, drop_var)
-    df = bdd.bdd2bow(bdd)
+    df = bdd.bdd2bow(df)
     idx, mtx = bdd.df2np(df)
     del df
     
-    km = Kmeans(mtx, nb_cluster=20, cpu=8, methode_dist="cosine", adr=img_dir, index=idx)
+    km = Kmeans(mtx, nb_cluster=5, cpu=8, methode_dist="cosine", adr=img_dir, index=idx)
     km.run_global(choose_nb_graph=True)
     
     km.save(km_path)
