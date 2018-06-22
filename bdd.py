@@ -110,7 +110,7 @@ def filter_bow(bow, mini = 1):
     Sortie :
         bow_f : le dataframe bag of words filtré
     """
-    test = (((bow > 0).sum()) >= mini).as_matrix()
+    test = (((bow > 0).sum()) >= mini).values
     bow_f = bow.iloc[:, test]
     return bow_f
     
@@ -188,7 +188,7 @@ def df2np(df):
         idx : numpy array des indices de la dataframe
         mtx : numpy array des valeurs de la dataframe
     """
-    mtx = df.as_matrix()
+    mtx = df.values
     idx = df.index.values
     return (idx, mtx)
 
@@ -230,6 +230,18 @@ def date_dir(dirname):
             print("Erreur '{}' sur l'étape {}".format(e, i))
             continue
     return bdd
+
+
+def print_means_words(km, col, lim = 10):
+    means = km.means
+    D = pd.DataFrame(means, columns=col)
+    for i in range(km.nb_cluster):
+        lst = list(D.sort_values(by = i, axis = 1).iloc[i, :lim].index.values)
+        n = km.data.index[(km.grp[:, 1] == i)].size
+        print("Les {} mots représentatif du groupe {} composé de {} individus sont :\n\t {}".format(lim, i, n, ' - '.join(lst)))
+    return None
+    
+    
     
 
 

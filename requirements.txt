@@ -4,3 +4,4 @@ pathos
 pandas
 datetime
 matplotlib
+imageio

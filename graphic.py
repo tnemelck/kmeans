@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import glob
 import imageio
 import os
+from os.path import abspath
 import shutil
 
 
@@ -33,7 +34,7 @@ class Grphq():
             color : couleurs à utiliser
         """
         self.dim_plot = dim_plot
-        self.adr_img = adr
+        self.adr_img = abspath(adr)
         self.nb_cluster = nb_cluster
         self.color = self.select_color()
         self.erase = erase
@@ -59,16 +60,16 @@ class Grphq():
         plt.legend(loc = 'best')
         plt.title("Répartition à l'étape {}".format(etape))
         plt.plot()
-        plt.savefig("{}img_{}.png".format(self.adr_img, str(etape).zfill(zfill)), format="png", bbox_inches = 'tight', dpi = 1000)
+        plt.savefig("{}/img_{}.png".format(self.adr_img, str(etape).zfill(zfill)), format="png", bbox_inches = 'tight', dpi = 200)
         plt.show()
         
     def create_gif(self, duration = 0.5):
         """Crée un gif à partir des images du répertoire de stockage."""
         images = []
-        filenames = sorted(glob.glob("{}img*.png".format(self.adr_img), recursive=True))
+        filenames = sorted(glob.glob("{}/img*.png".format(self.adr_img), recursive=True))
         for filename in filenames:
             images.append(imageio.imread(filename, format="png"))
-        output_file = "{}animation.gif".format(self.adr_img)
+        output_file = "{}/animation.gif".format(self.adr_img)
         imageio.mimsave(output_file, images, duration=duration)
       
         
@@ -122,7 +123,7 @@ class Grphq():
         plt.legend(loc = 'best')
         plt.title("Évolution du 'gap statistical' comparé\nen fonction du nombre de clusters")
         plt.xlabel("Nombre de cluster")
-        plt.savefig("{}errorOfCluster.png".format(self.adr_img), format="png", bbox_inches = 'tight', dpi = 1000)
+        plt.savefig("{}/errorOfCluster.png".format(self.adr_img), format="png", bbox_inches = 'tight', dpi = 200)
         plt.show()
         arg = np.where(err[-1] >= 0)[0][0]
         print("Le nombre idéal de cluster est de {}".format(err[0, arg]))

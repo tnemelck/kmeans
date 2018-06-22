@@ -726,6 +726,11 @@ La méthode de calcule de distance s'appelle {} et la méthode de choix des cent
              "dim_plot" : self.grphq.dim_plot,
              "adr" : self.grphq.adr_img,
              "erase_dir" : self.grphq.erase}
+        adr = os.path.abspath(adr)
+        try: 
+            os.makedirs(os.path.dirname(adr))
+        except FileExistsError:
+            pass
         dump(d, open(adr, 'wb'))
         return None
     

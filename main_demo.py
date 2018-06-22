@@ -10,10 +10,10 @@ from kmeans import Kmeans
 import test_cluster as tc
 
 def main():
-    img_dir = '/home/elvex/utt/SRT6/IF25/projet/img_test_1000_4'
-    km_path = '/home/elvex/utt/SRT6/IF25/projet/KM/test_1000_4'
+    img_dir = '/home/elvex/utt/SRT6/IF25/projet/img_test_100_4'
+    km_path = '/home/elvex/utt/SRT6/IF25/projet/KM/test_100_4'
     
-    km = Kmeans(tc.init_board_gauss(1000, 4, -100, 100, 5, 10), nb_cluster=20, cpu=8, methode_dist="euclidean", adr=img_dir)
+    km = Kmeans(tc.init_board_gauss(100, 4, -100, 100, 5, 10), nb_cluster=6, cpu=8, methode_dist="euclidean", adr=img_dir)
     km.run_global(choose_nb_graph=True, grphq=True)
     
     km.save(km_path)
