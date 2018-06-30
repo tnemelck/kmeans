@@ -10,12 +10,12 @@ Created on Sat Jun 16 16:18:07 2018
 from kmeans import Kmeans
 import bdd
 
+path = './BDD/sncf/' #Répertoire des fichiers json de tweets.
+img_dir = './IMG/img_sncf_mots'
+km_path = './KM/sncf_mots'
+drop_var = 5
+
 def main():
-    path = '/home/elvex/utt/SRT6/IF25/projet/BDD/ramadan/'
-    img_dir = '/home/elvex/utt/SRT6/IF25/projet/img_sncf_mots'
-    km_path = '/home/elvex/utt/SRT6/IF25/projet/KM/sncf_mots'
-    drop_var = 1
-    
     df = bdd.concat_dir(path)
     df = bdd.drop_profile(df, drop_var)
     df = bdd.bdd2bow(df)
@@ -23,9 +23,11 @@ def main():
     col = df.columns.values.astype(str)
     del df
     
-    km = Kmeans(mtx, nb_cluster=4, cpu=8, methode_dist="cosine", adr=img_dir, index=idx)
+    km = Kmeans(mtx, nb_cluster=nb_cluster, cpu=cpu, methode_dist=methode_dist, adr=img_dir, index=idx)
     km.run_global(choose_nb_graph=True)
     bdd.print_means_words(km, col)
     km.save(km_path)
-    
-    return km
+    print("\n{}".format(km))
+    return None
+
+main()

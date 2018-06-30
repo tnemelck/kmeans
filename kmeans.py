@@ -642,7 +642,6 @@ class Kmeans():
         log = np.log10(err_init[1])
         mean_alea, var_alea = [], []
         for i in range(1, self.nb_cluster + 1):
-            print(0)
             err = []
             f = partial(self.__stat_i, mini = mini, maxi = maxi, shape = shape, i = i)
             pool.restart()
